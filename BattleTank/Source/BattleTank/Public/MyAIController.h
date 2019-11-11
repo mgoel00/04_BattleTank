@@ -11,6 +11,7 @@
  */
 
 class UTankAimingComponent;
+class ATank;
 
 UCLASS()
 class BATTLETANK_API AMyAIController : public AAIController
@@ -23,6 +24,10 @@ private:
 	virtual void SetPawn(APawn* InPawn) override;
 
 	virtual void Tick(float DeltaSeconds) override;
+
+	void GetEnemyTanks();
+
+	AActor* GetNearestTank();
 	
 public:
 
@@ -30,4 +35,11 @@ private:
 	UTankAimingComponent* AimingComponent = nullptr;
 
 	APawn* ControlledTank = nullptr;
+	ATank* CastedControlledTank = nullptr;
+
+	TArray<AActor*> EnemyTanks;
+
+	AActor* TankToAim = nullptr;
+
+	float ClosestTankDistanceComparisonDefaultValue = 200000.0f;
 };

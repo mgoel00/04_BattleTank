@@ -21,11 +21,6 @@ public:
 
 
 private:
-
-	virtual void BeginPlay() override;
-
-	virtual void Tick(float DeltaSeconds) override;
-
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	void SetSelectedTank(AActor* PointedActor);
 

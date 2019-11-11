@@ -5,17 +5,6 @@
 #include "Tank.h"
 #include "StrategyController.h"
 
-
-void AStrategyController::BeginPlay()
-{
-
-}
-
-void AStrategyController::Tick(float DeltaSeconds)
-{
-
-}
-
 void AStrategyController::SetSelectedTank(AActor* PointedActor)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Tank Selected"));
