@@ -7,6 +7,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTankDelegate);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FTankOverlapInfo);
+
 UCLASS()
 class BATTLETANK_API ATank : public APawn
 {
@@ -22,10 +24,22 @@ public:
 
 	FTankDelegate OnDeath;
 
+	FTankOverlapInfo OverlapOccured;
+
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	void SetPointedLocation(FVector Location);
 
+	//Gets the location pointed by mouse
 	FVector GetLocationPointedByMouse() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void SendOverlapSingal();
+
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void SetOverlapedActor(AActor* Actor);
+
+	AActor* GetOverlapedActor() const;
+
 
 private:
 	// Sets default values for this pawn's properties
@@ -40,5 +54,7 @@ private:
 	int32 CurrentHealth; // Initialised in Begin Play
 
 	FVector LocationPointedByMouse;
+
+	AActor* OverlapedActor = nullptr;
 
 };

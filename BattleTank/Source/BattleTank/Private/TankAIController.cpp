@@ -4,6 +4,7 @@
 #include "TankAimingComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "TankAIController.h"
+#include "WorldInfoProvider.h"
 #include "Tank.h" // So we can impliment OnDeath
 
 // Depends on movement component via pathfinding system
@@ -13,6 +14,8 @@ void ATankAIController::BeginPlay()
 	Super::BeginPlay();
 	ControlledTank = GetPawn();
 	AimingComponent = ControlledTank->FindComponentByClass<UTankAimingComponent>();
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "InfoAgent", WorldInfoProviders);
+	WorldInfoProvider = Cast<AWorldInfoProvider>(WorldInfoProviders[0]);
 	GetEnemyTank();
 }
 
@@ -22,10 +25,17 @@ void ATankAIController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	//auto PlayerTank = GetWorld()->GetFirstPlayerController()->GetPawn();
-	if (!(TankToAim && ControlledTank)) { return; }
+	if (!(ensure(TankToAim && ControlledTank))) { return; }
 
-	// Move towards the player
-	MoveToActor(TankToAim, AcceptanceRadius); // TODO check radius is in cm
+	if (bFollowOverlapLogic)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Follow the other path"));
+	}
+	else
+	{
+		// Move towards the player
+		MoveToActor(TankToAim, AcceptanceRadius);
+	}
 
 	// Aim towards the player
 
@@ -49,6 +59,7 @@ void ATankAIController::SetPawn(APawn* InPawn)
 
 		// Subscribe our local method to the tank's death event
 		PossessedTank->OnDeath.AddUniqueDynamic(this, &ATankAIController::OnPossedTankDeath);
+		PossessedTank->OverlapOccured.AddUniqueDynamic(this, &ATankAIController::AvoidObstacles);
 	}
 }
 
@@ -56,4 +67,9 @@ void ATankAIController::OnPossedTankDeath()
 {
 	if (!ensure(GetPawn())) { return; } // TODO remove if ok
 	GetPawn()->DetachFromControllerPendingDestroy();
+}
+
+void ATankAIController::AvoidObstacles()
+{
+	bFollowOverlapLogic = true;
 }

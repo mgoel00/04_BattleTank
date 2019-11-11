@@ -10,6 +10,7 @@
  */
 class UTankAimingComponent;
 class ATank;
+class AWorldInfoProvider;
 
 UCLASS()
 class BATTLETANK_API ATankAIController : public AAIController
@@ -33,6 +34,9 @@ private:
 	UFUNCTION()
 	void OnPossedTankDeath();
 
+	UFUNCTION()
+	void AvoidObstacles();
+
 	UTankAimingComponent* AimingComponent = nullptr;
 
 	APawn* ControlledTank = nullptr;
@@ -41,4 +45,9 @@ private:
 
 	TArray<AActor*> EnemyTanks;
 
+	TArray<AActor*> WorldInfoProviders;
+
+	AWorldInfoProvider* WorldInfoProvider = nullptr;
+
+	bool bFollowOverlapLogic = false;
 };

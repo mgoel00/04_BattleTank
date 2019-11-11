@@ -4,6 +4,7 @@
 #include "TankAimingComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Tank.h"
+#include "WorldInfoProvider.h"
 #include "MyAIController.h"
 
 
@@ -14,6 +15,9 @@ void AMyAIController::BeginPlay()
 	ControlledTank = GetPawn();
 	CastedControlledTank = Cast<ATank>(ControlledTank);
 	AimingComponent = ControlledTank->FindComponentByClass<UTankAimingComponent>();
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "InfoAgent", WorldInfoProviders);
+	WorldInfoProvider = Cast<AWorldInfoProvider>(WorldInfoProviders[0]);
+	WorldInfoProvider->EnemyTankDiedSignal.AddUniqueDynamic(this, &AMyAIController::GetEnemyTanks);
 	GetEnemyTanks();
 }
 
@@ -27,10 +31,13 @@ void AMyAIController::Tick(float DeltaSeconds)
 		MoveToLocation(CastedControlledTank->GetLocationPointedByMouse(), 500.0f);
 
 		//Aiming and Fire
-		if (TankToAim)
+		if (ensure(TankToAim) && bInRange)
 		{
 			AimingComponent->AimAt(TankToAim->GetActorLocation());
 			AimingComponent->Fire();
+			DistanceFromCurrentEnemy = FVector::Dist(TankToAim->GetActorLocation(), ControlledTank->GetActorLocation());
+			if (DistanceFromCurrentEnemy > MaxRangeToAttack)
+				bInRange = false;
 		}
 		else
 		{
@@ -39,19 +46,25 @@ void AMyAIController::Tick(float DeltaSeconds)
 			TankToAim = GetNearestTank();
 		}
 	}
-
-	
 }
 
 void AMyAIController::SetPawn(APawn* InPawn)
 {
 	Super::SetPawn(InPawn);
+	if (InPawn)
+	{
+		auto PossessedTank = Cast<ATank>(InPawn);
+		if (!PossessedTank) { return; }
 
+		// Subscribe our local method to the tank's death event
+		PossessedTank->OnDeath.AddUniqueDynamic(this, &AMyAIController::OnPossessedTankDeath);
+	}
 }
 
 void AMyAIController::GetEnemyTanks()
 {
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "EnemyTank", EnemyTanks);
+	bInRange = false;
 }
 
 AActor* AMyAIController::GetNearestTank()
@@ -69,8 +82,15 @@ AActor* AMyAIController::GetNearestTank()
 				RequiredActor = Tank;
 			}
 		}
+		bInRange = true;
 		return RequiredActor;
 	}
 	else
 		return nullptr;
+}
+
+void AMyAIController::OnPossessedTankDeath()
+{
+	if (!ensure(GetPawn())) { return; }
+	GetPawn()->DetachFromControllerPendingDestroy();
 }

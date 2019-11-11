@@ -12,6 +12,7 @@
 
 class UTankAimingComponent;
 class ATank;
+class AWorldInfoProvider;
 
 UCLASS()
 class BATTLETANK_API AMyAIController : public AAIController
@@ -25,6 +26,10 @@ private:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	UFUNCTION()
+	void OnPossessedTankDeath();
+
+	UFUNCTION()
 	void GetEnemyTanks();
 
 	AActor* GetNearestTank();
@@ -42,4 +47,14 @@ private:
 	AActor* TankToAim = nullptr;
 
 	float ClosestTankDistanceComparisonDefaultValue = 200000.0f;
+
+	float MaxRangeToAttack = 20000.0f;
+
+	bool bInRange = true;
+
+	float DistanceFromCurrentEnemy;
+
+	TArray<AActor*> WorldInfoProviders;
+
+	AWorldInfoProvider* WorldInfoProvider = nullptr;
 };
