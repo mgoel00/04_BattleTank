@@ -22,6 +22,11 @@ public:
 
 	FTankDelegate OnDeath;
 
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void SetPointedLocation(FVector Location);
+
+	FVector GetLocationPointedByMouse() const;
+
 private:
 	// Sets default values for this pawn's properties
 	ATank();
@@ -33,5 +38,7 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = "Health")
 	int32 CurrentHealth; // Initialised in Begin Play
+
+	FVector LocationPointedByMouse;
 
 };

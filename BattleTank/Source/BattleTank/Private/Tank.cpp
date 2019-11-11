@@ -20,6 +20,7 @@ void ATank::BeginPlay()
 {
 	Super::BeginPlay();
 	CurrentHealth = StartingHealth;
+	LocationPointedByMouse = GetActorLocation();
 }
 
 float ATank::TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEvent, class AController * EventInstigator, AActor * DamageCauser)
@@ -33,4 +34,14 @@ float ATank::TakeDamage(float DamageAmount, struct FDamageEvent const & DamageEv
 		OnDeath.Broadcast();
 	}
 	return DamageToApply;
+}
+
+void ATank::SetPointedLocation(FVector Location)
+{
+	LocationPointedByMouse = Location;
+}
+
+FVector ATank::GetLocationPointedByMouse() const
+{
+	return LocationPointedByMouse;
 }
