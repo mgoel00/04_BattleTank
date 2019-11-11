@@ -2,6 +2,7 @@
 
 #include "BattleTank.h"
 #include "TankAimingComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "TankAIController.h"
 #include "Tank.h" // So we can impliment OnDeath
 
@@ -10,6 +11,32 @@
 void ATankAIController::BeginPlay()
 {
 	Super::BeginPlay();
+	ControlledTank = GetPawn();
+	AimingComponent = ControlledTank->FindComponentByClass<UTankAimingComponent>();
+	GetEnemyTank();
+}
+
+// Called every frame
+void ATankAIController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	//auto PlayerTank = GetWorld()->GetFirstPlayerController()->GetPawn();
+	if (!(TankToAim && ControlledTank)) { return; }
+
+	// Move towards the player
+	MoveToActor(TankToAim, AcceptanceRadius); // TODO check radius is in cm
+
+	// Aim towards the player
+
+	AimingComponent->AimAt(TankToAim->GetActorLocation());
+	AimingComponent->Fire(); // TODO limit firing rate
+}
+
+void ATankAIController::GetEnemyTank()
+{
+	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "MyTank", EnemyTanks);
+	TankToAim = EnemyTanks[0];
 }
 
 void ATankAIController::SetPawn(APawn* InPawn)
@@ -29,27 +56,4 @@ void ATankAIController::OnPossedTankDeath()
 {
 	if (!ensure(GetPawn())) { return; } // TODO remove if ok
 	GetPawn()->DetachFromControllerPendingDestroy();
-}
-
-// Called every frame
-void ATankAIController::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-
-	auto PlayerTank = GetWorld()->GetFirstPlayerController()->GetPawn();
-	auto ControlledTank = GetPawn();
-
-	if (!(PlayerTank && ControlledTank)) { return; }
-	
-	// Move towards the player
-	MoveToActor(PlayerTank, AcceptanceRadius); // TODO check radius is in cm
-
-	// Aim towards the player
-	auto AimingComponent = ControlledTank->FindComponentByClass<UTankAimingComponent>();
-	AimingComponent->AimAt(PlayerTank->GetActorLocation());
-
-	if (AimingComponent->GetFiringState() == EFiringState::Locked)
-	{
-		AimingComponent->Fire(); // TODO limit firing rate
-	}
 }

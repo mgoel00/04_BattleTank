@@ -8,6 +8,9 @@
 /**
  * 
  */
+class UTankAimingComponent;
+class ATank;
+
 UCLASS()
 class BATTLETANK_API ATankAIController : public AAIController
 {
@@ -16,7 +19,7 @@ class BATTLETANK_API ATankAIController : public AAIController
 protected:
 	// How close can the AI tank get
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
-	float AcceptanceRadius = 8000;
+		float AcceptanceRadius = 8000.0f;
 
 private:
 	virtual void BeginPlay() override;
@@ -25,6 +28,17 @@ private:
 
 	virtual void Tick(float DeltaSeconds) override;
 
+	void GetEnemyTank();
+
 	UFUNCTION()
 	void OnPossedTankDeath();
+
+	UTankAimingComponent* AimingComponent = nullptr;
+
+	APawn* ControlledTank = nullptr;
+
+	AActor* TankToAim = nullptr;
+
+	TArray<AActor*> EnemyTanks;
+
 };
