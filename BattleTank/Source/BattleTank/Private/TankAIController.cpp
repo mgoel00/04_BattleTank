@@ -5,6 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "TankAIController.h"
 #include "WorldInfoProvider.h"
+#include "DrawDebugHelpers.h"
 #include "Tank.h" // So we can impliment OnDeath
 
 // Depends on movement component via pathfinding system
@@ -13,6 +14,7 @@ void ATankAIController::BeginPlay()
 {
 	Super::BeginPlay();
 	ControlledTank = GetPawn();
+	CastedControlledTank = Cast<ATank>(ControlledTank);
 	AimingComponent = ControlledTank->FindComponentByClass<UTankAimingComponent>();
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "InfoAgent", WorldInfoProviders);
 	WorldInfoProvider = Cast<AWorldInfoProvider>(WorldInfoProviders[0]);
@@ -30,11 +32,14 @@ void ATankAIController::Tick(float DeltaTime)
 	if (bFollowOverlapLogic)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Follow the other path"));
+		//MoveToLocation(PositionToAvoidObstacles, 500.0f);
 	}
 	else
 	{
 		// Move towards the player
-		MoveToActor(TankToAim, AcceptanceRadius);
+		DistanceFromCurrentTarget = FVector::Dist(TankToAim->GetActorLocation(), ControlledTank->GetActorLocation());
+		if(DistanceFromCurrentTarget >= SafeDistance)
+			MoveToActor(TankToAim, AcceptanceRadius);
 	}
 
 	// Aim towards the player
@@ -71,5 +76,23 @@ void ATankAIController::OnPossedTankDeath()
 
 void ATankAIController::AvoidObstacles()
 {
+	FindPositionToAvoidCollision();
 	bFollowOverlapLogic = true;
+}
+
+void ATankAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Move Completed"));
+	bFollowOverlapLogic = false;
+}
+
+void ATankAIController::FindPositionToAvoidCollision()
+{
+	USceneComponent* SceneComponentOfControlledTank = ControlledTank->FindComponentByClass<USceneComponent>();
+	USceneComponent* SceneComponentOfOverlapedTank = CastedControlledTank->GetOverlapedActor()->FindComponentByClass<USceneComponent>();
+	FHitResult HitResult;
+	FVector Start = ControlledTank->GetActorLocation() + FVector(0.0f,0.0f,100.0f);
+	FVector End = Start + (SceneComponentOfOverlapedTank->GetForwardVector().GetSafeNormal() - SceneComponentOfControlledTank->GetForwardVector().GetSafeNormal()).GetSafeNormal()*1000.0f;
+	GetWorld()->LineTraceSingleByChannel(HitResult,Start,End,ECollisionChannel::ECC_Visibility);
+	DrawDebugLine(GetWorld(),Start,End,FColor::Blue,false,2.0f);
 }

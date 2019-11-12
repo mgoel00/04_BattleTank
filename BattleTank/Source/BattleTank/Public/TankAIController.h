@@ -17,10 +17,19 @@ class BATTLETANK_API ATankAIController : public AAIController
 {
 	GENERATED_BODY()
 
+public:
+	void OnMoveCompleted( FAIRequestID RequestID, const FPathFollowingResult& Result);
+
 protected:
 	// How close can the AI tank get
 	UPROPERTY(EditDefaultsOnly, Category = "Setup")
-		float AcceptanceRadius = 8000.0f;
+	float AcceptanceRadius = 1000.0f;
+
+	FVector PositionToAvoidObstacles;
+
+	float SafeDistance = 3000.0f;
+
+	float DistanceFromCurrentTarget;
 
 private:
 	virtual void BeginPlay() override;
@@ -37,9 +46,15 @@ private:
 	UFUNCTION()
 	void AvoidObstacles();
 
+	void FindPositionToAvoidCollision();
+
+private:
+
 	UTankAimingComponent* AimingComponent = nullptr;
 
 	APawn* ControlledTank = nullptr;
+
+	ATank* CastedControlledTank = nullptr;
 
 	AActor* TankToAim = nullptr;
 
