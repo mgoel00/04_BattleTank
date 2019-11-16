@@ -46,6 +46,9 @@ private:
 	UFUNCTION()
 	void AvoidObstacles();
 
+	UFUNCTION(BlueprintCallable, Category = "Setup")
+	void SetBoolenForPathFollowingWhenOverlapEnds(bool bFollowOrNot);
+
 	void FindPositionToAvoidCollision();
 
 private:

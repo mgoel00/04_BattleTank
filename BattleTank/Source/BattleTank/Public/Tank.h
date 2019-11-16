@@ -25,6 +25,7 @@ public:
 	FTankDelegate OnDeath;
 
 	FTankOverlapInfo OverlapOccured;
+	
 
 	UFUNCTION(BlueprintCallable, Category = "Setup")
 	void SetPointedLocation(FVector Location);

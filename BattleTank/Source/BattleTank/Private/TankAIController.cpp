@@ -28,18 +28,23 @@ void ATankAIController::Tick(float DeltaTime)
 
 	//auto PlayerTank = GetWorld()->GetFirstPlayerController()->GetPawn();
 	if (!(ensure(TankToAim && ControlledTank))) { return; }
-
+	UE_LOG(LogTemp, Warning, TEXT("%i"), bFollowOverlapLogic);
 	if (bFollowOverlapLogic)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Follow the other path"));
-		//MoveToLocation(PositionToAvoidObstacles, 500.0f);
+		//UE_LOG(LogTemp, Warning, TEXT("Follow the other path"));
+		MoveToLocation(PositionToAvoidObstacles, 500.0f);
 	}
 	else
 	{
 		// Move towards the player
 		DistanceFromCurrentTarget = FVector::Dist(TankToAim->GetActorLocation(), ControlledTank->GetActorLocation());
-		if(DistanceFromCurrentTarget >= SafeDistance)
+		if (DistanceFromCurrentTarget >= SafeDistance)
+		{
+			//UE_LOG(LogTemp, Warning, TEXT("Following target"));
 			MoveToActor(TankToAim, AcceptanceRadius);
+		}
+		else
+			StopMovement();
 	}
 
 	// Aim towards the player
@@ -82,8 +87,8 @@ void ATankAIController::AvoidObstacles()
 
 void ATankAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Move Completed"));
-	bFollowOverlapLogic = false;
+	//UE_LOG(LogTemp, Warning, TEXT("Move Completed"));
+	//bFollowOverlapLogic = false;
 }
 
 void ATankAIController::FindPositionToAvoidCollision()
@@ -95,4 +100,10 @@ void ATankAIController::FindPositionToAvoidCollision()
 	FVector End = Start + (SceneComponentOfOverlapedTank->GetForwardVector().GetSafeNormal() - SceneComponentOfControlledTank->GetForwardVector().GetSafeNormal()).GetSafeNormal()*1000.0f;
 	GetWorld()->LineTraceSingleByChannel(HitResult,Start,End,ECollisionChannel::ECC_Visibility);
 	DrawDebugLine(GetWorld(),Start,End,FColor::Blue,false,2.0f);
+}
+
+void ATankAIController::SetBoolenForPathFollowingWhenOverlapEnds(bool bFollowOrNot)
+{
+	bFollowOverlapLogic = bFollowOrNot;
+	UE_LOG(LogTemp, Warning, TEXT("Overlap ended: %i"),bFollowOrNot);
 }

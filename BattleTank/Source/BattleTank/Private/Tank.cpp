@@ -65,7 +65,7 @@ void ATank::SendOverlapSingal()
 	}
 }
 
-AActor * ATank::GetOverlapedActor() const
+AActor* ATank::GetOverlapedActor() const
 {
 	return OverlapedActor;
 }
