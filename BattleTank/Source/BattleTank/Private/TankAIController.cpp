@@ -96,8 +96,8 @@ void ATankAIController::FindPositionToAvoidCollision()
 	USceneComponent* SceneComponentOfControlledTank = ControlledTank->FindComponentByClass<USceneComponent>();
 	USceneComponent* SceneComponentOfOverlapedTank = CastedControlledTank->GetOverlapedActor()->FindComponentByClass<USceneComponent>();
 	FHitResult HitResult;
-	FVector Start = ControlledTank->GetActorLocation() + FVector(0.0f,0.0f,100.0f);
-	FVector End = Start + (SceneComponentOfOverlapedTank->GetForwardVector().GetSafeNormal() - SceneComponentOfControlledTank->GetForwardVector().GetSafeNormal()).GetSafeNormal()*1000.0f;
+	FVector Start = ControlledTank->GetActorLocation() + FVector(0.0f,0.0f,800.0f);
+	FVector End = Start - (SceneComponentOfOverlapedTank->GetForwardVector().GetSafeNormal() + SceneComponentOfControlledTank->GetForwardVector().GetSafeNormal()).GetSafeNormal()*5000.0f;
 	GetWorld()->LineTraceSingleByChannel(HitResult,Start,End,ECollisionChannel::ECC_Visibility);
 	DrawDebugLine(GetWorld(),Start,End,FColor::Blue,false,2.0f);
 }

@@ -27,7 +27,7 @@ protected:
 
 	FVector PositionToAvoidObstacles;
 
-	float SafeDistance = 3000.0f;
+	float SafeDistance = 5000.0f;
 
 	float DistanceFromCurrentTarget;
 
