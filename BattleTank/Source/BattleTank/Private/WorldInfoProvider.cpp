@@ -20,6 +20,7 @@ void AWorldInfoProvider::BeginPlay()
 	Super::BeginPlay();
 	RefreshTheList();
 	EstablishDelegateSystem();
+	TankAssigningList = MyTanks;
 }
 
 // Called every frame
@@ -62,3 +63,35 @@ void AWorldInfoProvider::EstablishDelegateSystem()
 		Tank->OverlapOccured.AddUniqueDynamic(this, &AWorldInfoProvider::FriendlyTankDied);
 	}
 }
+
+
+///Buggy! Be Careful!
+/*AActor* AWorldInfoProvider::AssignTank()
+{
+	AActor* TargetTank = nullptr;
+	switch(NumberOfTanksToTarget){
+	case 3:
+		if (MyTanks.Num() == 3 && EnemyTanks.Num() == 3)
+		{
+			TargetTank = TankAssigningList.Pop();
+			break;
+		}
+		UE_LOG(LogTemp, Warning, TEXT("Going to 2"));
+	case 2:
+		if ((EnemyTanks.Num() - MyTanks.Num()) >= 1)
+		{
+
+			break;
+		}
+	case 1:
+		if (MyTanks.Num())
+		{
+			TargetTank = MyTanks[0];
+			break;
+		}
+		UE_LOG(LogTemp, Warning, TEXT("Going to 1"));
+	default:
+		break;
+	}
+	return TargetTank;
+}*/

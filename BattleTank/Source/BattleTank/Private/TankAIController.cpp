@@ -5,7 +5,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "TankAIController.h"
 #include "WorldInfoProvider.h"
-#include "DrawDebugHelpers.h"
+//#include "DrawDebugHelpers.h"
 #include "Tank.h" // So we can impliment OnDeath
 
 // Depends on movement component via pathfinding system
@@ -55,8 +55,10 @@ void ATankAIController::Tick(float DeltaTime)
 
 void ATankAIController::GetEnemyTank()
 {
+	//TankToAim = WorldInfoProvider->AssignTank();
 	UGameplayStatics::GetAllActorsWithTag(GetWorld(), "MyTank", EnemyTanks);
-	TankToAim = EnemyTanks[0];
+	if(EnemyTanks.Num())
+		TankToAim = EnemyTanks[0];
 }
 
 void ATankAIController::SetPawn(APawn* InPawn)
@@ -81,8 +83,14 @@ void ATankAIController::OnPossedTankDeath()
 
 void ATankAIController::AvoidObstacles()
 {
-	FindPositionToAvoidCollision();
-	bFollowOverlapLogic = true;
+	if (!CastedControlledTank->GetOverlapedActor()) { return; }
+	float DistanceOfMyTankFromTarget = FVector::Dist(ControlledTank->GetActorLocation(), TankToAim->GetActorLocation());
+	float DistanceOfEnemyFromTarget = FVector::Dist(CastedControlledTank->GetOverlapedActor()->GetActorLocation(), TankToAim->GetActorLocation());
+	if (DistanceOfMyTankFromTarget - DistanceOfEnemyFromTarget > 0)
+	{
+		FindPositionToAvoidCollision();
+		bFollowOverlapLogic = true;
+	}
 }
 
 void ATankAIController::OnMoveCompleted(FAIRequestID RequestID, const FPathFollowingResult& Result)
@@ -99,7 +107,7 @@ void ATankAIController::FindPositionToAvoidCollision()
 	FVector Start = ControlledTank->GetActorLocation() + FVector(0.0f,0.0f,800.0f);
 	FVector End = Start - (SceneComponentOfOverlapedTank->GetForwardVector().GetSafeNormal() + SceneComponentOfControlledTank->GetForwardVector().GetSafeNormal()).GetSafeNormal()*5000.0f;
 	GetWorld()->LineTraceSingleByChannel(HitResult,Start,End,ECollisionChannel::ECC_Visibility);
-	DrawDebugLine(GetWorld(),Start,End,FColor::Blue,false,2.0f);
+	//DrawDebugLine(GetWorld(),Start,End,FColor::Blue,false,2.0f);
 }
 
 void ATankAIController::SetBoolenForPathFollowingWhenOverlapEnds(bool bFollowOrNot)

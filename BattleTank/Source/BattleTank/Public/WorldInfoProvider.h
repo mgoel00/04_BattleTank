@@ -19,6 +19,8 @@ public:
 
 	FTankDied EnemyTankDiedSignal;
 
+	AActor* AssignTank();
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -42,4 +44,8 @@ public:
 private:
 	TArray<AActor*> EnemyTanks;
 	TArray<AActor*> MyTanks;
+	TArray<AActor*> TankAssigningList;
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setup")
+	int NumberOfTanksToTarget = 3;
 };
